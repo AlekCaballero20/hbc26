@@ -1,0 +1,650 @@
+/* ==========================================================================
+   polish.css — capa de pulido visual
+   --------------------------------------------------------------------------
+   Va después de styles.css y puzzles.css a propósito: aquí solo hay mejoras
+   incrementales (reproductor propio, animaciones de entrada, foco accesible,
+   celebración de etapa). Nada de esto reescribe el CSS viejo, así que se
+   puede quitar el <link> y la app sigue funcionando igual, solo más plana.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Foco accesible
+   El teclado y el lector de pantalla existían sin anillo de foco visible.
+   -------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reproductor de la canción
+   -------------------------------------------------------------------------- */
+
+.player {
+  --played: 0%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(120deg, rgba(255, 143, 199, 0.14), rgba(141, 107, 255, 0.12)),
+    rgba(255, 255, 255, 0.07);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.player.is-playing {
+  border-color: rgba(255, 143, 199, 0.5);
+  box-shadow: 0 0 0 1px rgba(255, 143, 199, 0.18), 0 18px 46px rgba(255, 95, 168, 0.16);
+}
+
+.player.needs-gesture .player__toggle {
+  animation: playerBeckon 1.6s ease-in-out infinite;
+}
+
+.player.is-broken {
+  opacity: 0.6;
+}
+
+.player__toggle {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--rose), var(--violet));
+  box-shadow: 0 10px 26px rgba(255, 95, 168, 0.34);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+
+.player__toggle:hover {
+  transform: scale(1.06);
+}
+
+.player__toggle:active {
+  transform: scale(0.94);
+}
+
+/* El icono es CSS puro: un triángulo que se convierte en dos barras. */
+.player__icon {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-style: solid;
+  border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent #fff;
+  transition: all 0.2s ease;
+}
+
+.player.is-playing .player__icon {
+  width: 14px;
+  height: 16px;
+  margin-left: 0;
+  border-style: double;
+  border-width: 0 0 0 14px;
+  border-color: #fff;
+}
+
+.player__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.player__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.player__label {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+/* Ecualizador decorativo: solo se mueve cuando de verdad está sonando. */
+.player__eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.player__eq span {
+  width: 3px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pink);
+  opacity: 0.4;
+}
+
+.player.is-playing .player__eq span {
+  opacity: 1;
+  animation: eqBounce 0.85s ease-in-out infinite alternate;
+}
+
+@keyframes eqBounce {
+  from { height: 3px; }
+  to   { height: 16px; }
+}
+
+@keyframes playerBeckon {
+  0%, 100% { transform: scale(1); box-shadow: 0 10px 26px rgba(255, 95, 168, 0.34); }
+  50%      { transform: scale(1.07); box-shadow: 0 10px 34px rgba(255, 95, 168, 0.6); }
+}
+
+/* Barra de avance: un range al que le quitamos toda la piel del navegador. */
+.player__scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.player__scrub::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--pink) var(--played),
+    rgba(255, 255, 255, 0.16) var(--played)
+  );
+}
+
+.player__scrub::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--pink) var(--played),
+    rgba(255, 255, 255, 0.16) var(--played)
+  );
+}
+
+.player__scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(255, 95, 168, 0.75);
+  transition: transform 0.18s ease;
+}
+
+.player__scrub::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(255, 95, 168, 0.75);
+}
+
+.player__scrub:hover::-webkit-slider-thumb,
+.player__scrub:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+.player__times {
+  display: flex;
+  justify-content: space-between;
+  color: var(--soft);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   3. Botón de efectos de sonido
+   -------------------------------------------------------------------------- */
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+.sfx-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sfx-toggle[aria-pressed="true"] {
+  opacity: 0.6;
+}
+
+.sfx-toggle[aria-pressed="true"] .sfx-toggle__text {
+  text-decoration: line-through;
+}
+
+/* --------------------------------------------------------------------------
+   4. Anillo de progreso animado
+   Con @property el conic-gradient se puede interpolar; sin él simplemente
+   salta como antes, que es el comportamiento que ya había.
+   -------------------------------------------------------------------------- */
+
+@property --progress {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+
+:root {
+  transition: --progress 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.progress-ring {
+  transition: box-shadow 0.6s ease;
+}
+
+.progress-ring.is-growing {
+  box-shadow: 0 0 0 6px rgba(255, 143, 199, 0.14), 0 0 38px rgba(255, 143, 199, 0.45);
+}
+
+.progress-ring span {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.progress-ring.is-growing span {
+  transform: scale(1.18);
+}
+
+/* --------------------------------------------------------------------------
+   5. Tarjetas de etapa: entrada escalonada y estados más legibles
+   -------------------------------------------------------------------------- */
+
+.stage-card {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: stageCardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 70ms);
+  transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.stage-card.no-intro {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+@keyframes stageCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stage-card:not(.is-locked):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.34);
+}
+
+/* Brillo que cruza la tarjeta disponible: señala dónde seguir sin texto. */
+.stage-card.is-next::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 65%
+  );
+  background-size: 260% 100%;
+  animation: cardSheen 3.4s ease-in-out infinite;
+}
+
+@keyframes cardSheen {
+  0%   { background-position: 180% 0; }
+  55%  { background-position: -80% 0; }
+  100% { background-position: -80% 0; }
+}
+
+.stage-card.is-locked {
+  animation-delay: calc(var(--card-index, 0) * 70ms);
+}
+
+.stage-card.is-shaking {
+  animation: cardDenied 0.4s ease;
+}
+
+@keyframes cardDenied {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-7px); }
+  45%      { transform: translateX(6px); }
+  70%      { transform: translateX(-3px); }
+}
+
+.stage-card.just-completed {
+  animation: cardCompleted 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cardCompleted {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 211, 111, 0.5); }
+  100% { transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   6. Modal: entrada suave en vez de aparición seca
+   -------------------------------------------------------------------------- */
+
+.stage-modal[open] .modal-card {
+  animation: modalIn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.stage-modal[open]::backdrop {
+  animation: backdropIn 0.42s ease;
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.stage-modal.is-closing .modal-card {
+  animation: modalOut 0.24s ease forwards;
+}
+
+@keyframes modalOut {
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+/* Foto de la etapa: se revela con un desenfoque que se disipa. */
+.stage-image {
+  transition: filter 0.7s ease, opacity 0.7s ease, transform 0.7s ease;
+}
+
+.stage-image.is-loading {
+  filter: blur(14px);
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+/* --------------------------------------------------------------------------
+   7. Palabras reveladas
+   -------------------------------------------------------------------------- */
+
+.revealed-word {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.revealed-word.is-fresh {
+  animation: wordArrive 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wordArrive {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.14);
+    box-shadow: 0 0 26px rgba(255, 211, 111, 0.65);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+.game-counter {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+}
+
+.game-counter.is-bumping {
+  transform: scale(1.22);
+  color: #fff;
+}
+
+.game-counter.is-full {
+  background: linear-gradient(135deg, var(--rose), var(--violet));
+  border-color: transparent;
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   8. Celebración al completar una etapa
+   La frase de la etapa se lee entera una vez, en grande, antes de volver al
+   mapa. Es el único momento en que el mensaje se ve como mensaje y no como
+   pastillas sueltas.
+   -------------------------------------------------------------------------- */
+
+.stage-cheer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(28, 10, 48, 0.9), rgba(5, 3, 14, 0.94));
+  backdrop-filter: blur(8px);
+  transition: opacity 0.45s ease;
+}
+
+.stage-cheer.is-visible {
+  opacity: 1;
+}
+
+.stage-cheer__inner {
+  max-width: 620px;
+  text-align: center;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stage-cheer.is-visible .stage-cheer__inner {
+  transform: translateY(0) scale(1);
+}
+
+.stage-cheer__badge {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 211, 111, 0.4);
+  background: rgba(255, 211, 111, 0.12);
+  color: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.stage-cheer__phrase {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  line-height: 1.3;
+}
+
+.stage-cheer__phrase span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: cheerWord 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--word-index, 0) * 90ms + 260ms);
+}
+
+@keyframes cheerWord {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stage-cheer__hint {
+  margin-top: 22px;
+  color: var(--soft);
+  font-size: 0.85rem;
+}
+
+.cheer-heart {
+  position: absolute;
+  bottom: -40px;
+  font-size: 1.5rem;
+  pointer-events: none;
+  animation: cheerRise 2.6s ease-out forwards;
+}
+
+@keyframes cheerRise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  15% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translateY(-88vh) scale(1.15) rotate(28deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. PIN: acierto antes de entrar
+   -------------------------------------------------------------------------- */
+
+.pin-dots.is-correct .pin-dot {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(255, 211, 111, 0.7);
+  animation: pinWin 0.5s ease;
+}
+
+.pin-dots.is-correct .pin-dot:nth-child(2) { animation-delay: 0.06s; }
+.pin-dots.is-correct .pin-dot:nth-child(3) { animation-delay: 0.12s; }
+.pin-dots.is-correct .pin-dot:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes pinWin {
+  50% { transform: scale(1.45); }
+}
+
+.pin-key {
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+
+.pin-key.is-pressed {
+  transform: scale(0.9);
+  background: rgba(255, 143, 199, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   10. Movimiento reducido
+   Si el sistema pide menos animación, se apaga todo lo decorativo. Los
+   estados siguen siendo legibles porque ninguno depende solo del movimiento.
+   -------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Detalles finales
+   ------------------------------------------------------------------------ */
+
+/* Reiniciar progreso es la única acción destructiva del regalo. Antes tenía el
+   mismo peso visual que "Empezar el viaje", justo en la portada. Ahora es un
+   enlace apagado: sigue accesible, pero ya no invita a tocarlo. */
+.reset-link {
+  display: block;
+  margin: 26px auto 0;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--soft);
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.reset-link:hover,
+.reset-link:focus-visible {
+  opacity: 1;
+  color: var(--muted);
+}
+
+/* Botón para releer la carta desde la pantalla de cierre. */
+.reread-btn {
+  margin-top: 26px;
+}
+
+/* Mientras la carta se escribe sola, avisa que se puede saltar tocándola. */
+.typewriter-text.is-skippable {
+  cursor: pointer;
+}
+
+.typewriter-text.is-skippable::after {
+  content: "Toca para leerla completa";
+  display: block;
+  margin-top: 18px;
+  color: var(--soft);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-card,
+  .stage-card.is-next::before,
+  .stage-cheer__phrase span,
+  .player.is-playing .player__eq span,
+  .player.needs-gesture .player__toggle,
+  .revealed-word.is-fresh,
+  .cheer-heart,
+  .pin-dots.is-correct .pin-dot,
+  .stage-modal[open] .modal-card {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  :root {
+    transition: none;
+  }
+}
