@@ -65,6 +65,27 @@ queja.
 
 ---
 
+### El bug que cerraba la etapa en cada movimiento
+
+Mover una pieza del puzzle deslizante cerraba la etapa entera. La causa:
+`slideAt()` llama a `render()`, que hace `board.innerHTML = ""` y reconstruye
+las 16 casillas **mientras el evento `click` todavía está subiendo**. Cuando
+ese click llegaba al `<dialog>`, la casilla tocada ya no existía en el DOM,
+`event.target.closest(".modal-card")` devolvía `null`, y el handler de «tocar
+fuera para cerrar» creía que el toque había sido en el fondo.
+
+El mismo patrón estaba latente en sokoban (su tablero también se reconstruye
+en el handler) y en el rompecabezas, donde además soltar una pieza fuera de la
+tarjeta generaba un click con `target === dialog`.
+
+Arreglado con la comprobación estándar de `<dialog>`: un toque en el fondo
+llega con `target` === el propio dialog, así que comparar por identidad es
+exacto y no depende de que el DOM siga en pie. Y solo cierra si el gesto
+**también empezó** en el fondo, que es lo que evita el cierre accidental al
+arrastrar.
+
+---
+
 ### El enlace al compartirlo
 
 - `og:image` apuntaba a una ruta relativa, y **WhatsApp las ignora**: la tarjeta
@@ -80,6 +101,9 @@ Con servidor local a 375 px: los 8 puzzles montan sin errores de consola, las 8
 fotos cargan con la orientación correcta, autoplay real con la duración leída,
 las 6 pistas nuevas salen en la sopa, la carta se escribe y se salta, la
 pantalla de cierre queda en `opacity: 1`, y sin desbordamiento horizontal.
+
+En el sitio ya publicado se repitió la prueba: PIN, mapa, y cinco
+movimientos seguidos del deslizante sin que la etapa se cierre.
 
 El nonograma se verificó aparte: solver exhaustivo (1 sola solución, es el
 corazón), y el tablero resuelto a mano desde el estado a medio hacer, viendo
